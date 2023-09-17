@@ -16,7 +16,7 @@
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone
+git clone https://github.com/vartexxx/cat_charity_fund.git
 
 cd cat_charity_fund
 ```
@@ -57,7 +57,7 @@ SECRET=Секретный ключ
 
 Создать файлы миграций и применить их:  
 ```  
-alembic revision --autogenerate
+alembic revision -m 'example'
 
 alembic upgrade head
 ```  
@@ -68,4 +68,4 @@ uvicorn app.main:app --reload
 ```
 
 ### Автор:
-Бурлака Владислав vartexxx29@yandex.ru
+[Бурлака Владислав](https://github.com/vartexxx) vartexxx29@yandex.ru
