@@ -35,15 +35,16 @@ class CRUDBase:
             self,
             obj_in,
             session: AsyncSession,
-            user: Optional[User] = None
+            user: Optional[User] = None,
+            flag: bool = True
     ):
         obj_in_data = obj_in.dict()
         if user is not None:
             obj_in_data['user_id'] = user.id
         db_obj = self.model(**obj_in_data)
         session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
+        if flag:
+            await session.commit()
         return db_obj
 
     @staticmethod
@@ -51,6 +52,7 @@ class CRUDBase:
             db_obj,
             obj_in,
             session: AsyncSession,
+            flag: Optional[bool] = True
     ):
         obj_data = jsonable_encoder(db_obj)
         update_data = obj_in.dict(exclude_unset=True)
@@ -58,8 +60,9 @@ class CRUDBase:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
         session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
+        if flag:
+            await session.commit()
+            await session.refresh(db_obj)
         return db_obj
 
     @staticmethod
@@ -75,13 +78,7 @@ class CRUDBase:
             self,
             session: AsyncSession
     ):
-        opened_objects = await session.execute(
-            select(
-                self.model
-            ).where(
-                self.model.fully_invested.is_(False)
-            ).order_by(
-                self.model.create_date
-            )
-        )
-        return opened_objects.scalars().all()
+        return (
+            await session.execute(
+                select(self.model).where(self.model.fully_invested.is_(False))
+            )).scalars().all()

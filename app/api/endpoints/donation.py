@@ -54,11 +54,14 @@ async def create_donation(
     user: User = Depends(current_user),
 ):
     new_donation = await donation_crud.create(
-        donation, session, user
+        donation, session, user, flag=False
     )
-    await invest(
-        project=new_donation,
-        crud_class=charity_project_crud,
-        session=session
+    session.add_all(
+        invest(
+            new_donation,
+            await charity_project_crud.get_opened_objects(session)
+        )
     )
+    await session.commit()
+    await session.refresh(new_donation)
     return new_donation

@@ -1,5 +1,4 @@
 from fastapi import HTTPException, status
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.charity_project import charity_project_crud
@@ -20,7 +19,7 @@ async def check_name_duplicate(
         )
 
 
-async def check_charity_is_enable(
+async def check_project_exists(
         charity_project_id: int,
         session: AsyncSession,
 ) -> CharityProject:
@@ -33,23 +32,7 @@ async def check_charity_is_enable(
     return charity_project
 
 
-async def check_charity_project_before_edit(
-        charity_project_id: int,
-        full_amount: int,
-        session: AsyncSession) -> CharityProject:
-    charity_project = await charity_project_crud.get(charity_project_id, session)
-    if full_amount is not None:
-        if charity_project.invested_amount > full_amount:
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='Внесённая сумма должна быть больше новой!'
-            )
-        if charity_project.invested_amount == full_amount:
-            charity_project.fully_invested = True
-        return charity_project
-
-
-async def check_invested_amount_is_null(
+async def check_invested_amount(
         charity_project_id: int,
         session: AsyncSession
 ):
@@ -61,7 +44,19 @@ async def check_invested_amount_is_null(
         )
 
 
-async def check_fully_invested(charity_project_id: int, session: AsyncSession) -> None:
+def check_full_amount(
+        invested_amount: int,
+        full_amount_in: int
+) -> int:
+    if full_amount_in < invested_amount:
+        raise HTTPException(
+            status_code=400,
+            detail='Внесённая сумма должна быть больше новой!'
+        )
+    return full_amount_in
+
+
+async def check_project_closed(charity_project_id: int, session: AsyncSession) -> None:
     charity_project = await charity_project_crud.get(charity_project_id, session)
     if charity_project.fully_invested:
         raise HTTPException(
