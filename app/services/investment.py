@@ -4,7 +4,7 @@ from app.models.base import BaseProjectModel
 def invest(
         target: BaseProjectModel,
         sources: list[BaseProjectModel]
-):
+) -> list[BaseProjectModel]:
     if target.invested_amount is None:
         target.invested_amount = 0
     results = []
