@@ -54,7 +54,7 @@ async def create_donation(
     user: User = Depends(current_user),
 ):
     new_donation = await donation_crud.create(
-        donation, session, user, flag=False
+        donation, session, user, commit=False
     )
     session.add_all(
         invest(

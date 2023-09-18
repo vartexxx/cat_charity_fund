@@ -55,12 +55,10 @@ DATABASE_URL=sqlite+aiosqlite:///./test.db
 SECRET=Секретный ключ
 ```  
 
-Создать файлы миграций и применить их:  
-```  
-alembic revision -m 'example'
-
+Применить миграции:  
+```
 alembic upgrade head
-```  
+```
 
 Запустить проект:  
 ```  

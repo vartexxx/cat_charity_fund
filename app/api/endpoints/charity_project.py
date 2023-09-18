@@ -3,14 +3,9 @@ from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-# from app.api.validators import (
-#     check_name_duplicate, check_charity_is_enable,
-#     check_fully_invested, check_charity_project_before_edit,
-#     check_invested_amount_is_null)
 from app.api.validators import (
     check_name_duplicate, check_project_exists, check_invested_amount,
     check_full_amount, check_project_closed)
-
 from app.core.db import get_async_session
 from app.core.user import current_superuser
 from app.crud.charity_project import charity_project_crud
@@ -28,7 +23,9 @@ router = APIRouter()
     response_model=List[CharityProjectDB],
     response_model_exclude_none=True,
 )
-async def get_all_charity_projects(session: AsyncSession = Depends(get_async_session)):
+async def get_all_charity_projects(
+        session: AsyncSession = Depends(get_async_session)
+):
     return await charity_project_crud.get_multi(session)
 
 
@@ -43,7 +40,9 @@ async def create_new_charity_project(
         session: AsyncSession = Depends(get_async_session),
 ):
     await check_name_duplicate(charity_project.name, session)
-    project = await charity_project_crud.create(charity_project, session, flag=False)
+    project = await charity_project_crud.create(
+        charity_project, session, commit=False
+    )
     session.add_all(
         invest(
             project,
@@ -74,7 +73,7 @@ async def partially_update_charity_project(
         await check_name_duplicate(obj_in.name, session)
     await check_project_closed(charity_project_id, session)
     project = await charity_project_crud.update(
-        project, obj_in, session, flag=False
+        project, obj_in, session, commit=False
     )
     session.add_all([
         project,
